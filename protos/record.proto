@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+
+message Record {
+    message Owner {
+        // Public key of the agent who owns the record
+        string user_id = 1;
+
+        // Approximately when the owner was updated, as a Unix UTC timestamp
+        uint64 timestamp = 2;
+    }
+
+    message Creator {
+        // Public key of the agent who owns the record
+        string user_id = 1;
+
+        // Approximately when the owner was updated, as a Unix UTC timestamp
+        uint64 timestamp = 2;
+    }
+
+    message Location {
+        // Coordinates are expected to be in millionths of a degree
+        sint64 latitude = 1;
+        sint64 longitude = 2;
+
+        // Approximately when the location was updated, as a Unix UTC timestamp
+        uint64 timestamp = 3;
+    }
+
+    // The user-defined natural key which identifies the object in the
+    // real world (for example a serial number)
+    string record_id = 1;
+    string name =2;
+    string imageUrl = 3;
+    string price = 4;
+    bool isForSale =5;
+    // Ordered oldest to newest by timestamp
+    repeated Owner owners = 6;
+    Creator creator = 7;
+    repeated Location locations = 8;
+
+    uint64 created_timestamp = 9;
+    uint64 updated_timestamp = 10;
+
+}
+
+
+message RecordContainer {
+    repeated Record entries = 1;
+}

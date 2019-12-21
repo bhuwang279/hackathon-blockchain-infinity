@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+
+message InfinityPayload{
+    enum Action {
+        CREATE_USER = 0;
+        CREATE_RECORD = 1;
+        UPDATE_RECORD_LOCATION = 2;
+        TRANSFER_RECORD = 3;
+        UPDATE_RECORD_FOR_SALE=4;
+    }
+
+    // Whether the payload contains a create agent, create record,
+    // update record, or transfer record action
+    Action action = 1;
+
+    // The transaction handler will read from just one of these fields
+    // according to the action
+    CreateUserAction create_user = 2;
+    CreateRecordAction create_record = 3;
+    UpdateRecordLocationAction update_record_location = 4;
+    UpdateRecordForSaleAction update_record_for_sale = 5;
+    TransferRecordAction transfer_record = 6;
+
+    // Approximately when transaction was submitted, as a Unix UTC timestamp
+    uint64 timestamp = 7;
+}
+
+
+message CreateUserAction {
+    // A human-readable name identifying the new agent
+    string name = 1;
+
+    // Role of user
+    string role = 2;
+}
+
+
+message CreateRecordAction {
+    // The user-defined natural key which identifies the object in the
+    // real world (for example a serial number)
+    string record_id = 1;
+    string name =2;
+    string imageUrl = 3;
+    string price = 4;
+    bool isForSale =5;
+    // Coordinates are expected to be in millionths of a degree
+    sint64 latitude = 6;
+    sint64 longitude = 7;
+}
+
+
+message UpdateRecordLocationAction {
+    // The id of the record being updated
+    string record_id = 1;
+
+    // Coordinates are expected to be in millionths of a degree
+    sint64 latitude = 2;
+    sint64 longitude = 3;
+}
+
+message UpdateRecordForSaleAction {
+    //The id of the record being updated
+    string record_id = 1;
+
+    // Boolean field if product is for sale
+    bool isForSale = 2;
+}
+
+
+message TransferRecordAction {
+    // The id of the record for the ownership transfer
+    string record_id = 1;
+
+    // The public key of the user to which the record will be transferred
+    string receiving_user = 2;
+}

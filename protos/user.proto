@@ -1,0 +1,27 @@
+syntax="proto3";
+
+message User {
+    // The user's unique public key
+    string public_key = 1;
+
+    // A human-readable name identifying the agent
+    string name = 2;
+
+    // Approximately when the agent was registered, as a Unix UTC timestamp
+    uint64 timestamp = 3;
+
+    // Available type of roles
+//    enum RoleType {
+//        Admin = 0;
+//        Creator = 1;
+//        User = 2;
+//        Querier = 3;
+//    }
+    // Role of user
+    string role = 4;
+}
+
+
+message UserContainer {
+    repeated User entries = 1;
+}
