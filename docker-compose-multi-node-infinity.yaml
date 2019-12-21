@@ -1,0 +1,800 @@
+version: '2.1'
+volumes:
+  poet-shared:
+
+services:
+
+  infinity-shell:
+    build:
+      context: .
+      dockerfile: ./shell/Dockerfile
+    image: sawtooth-infinity-shell
+    container_name: infinity-shell
+    volumes:
+      - .:/project/sawtooth-infinity
+    command: |
+      bash -c "
+        infinity-protogen
+        cd ../
+        tail -f /dev/null
+      "
+  validator-0:
+    image: hyperledger/sawtooth-validator:chime
+    container_name: sawtooth-validator-default-0
+    expose:
+      - 4004
+      - 5050
+      - 8800
+    volumes:
+      - poet-shared:/poet-shared
+    command: "bash -c \"\
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-0 || true && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-0/ && \
+          while [ ! -f /poet-shared/poet-enclave-measurement ]; do sleep 1; done && \
+          while [ ! -f /poet-shared/poet-enclave-basename ]; do sleep 1; done && \
+          while [ ! -f /poet-shared/poet.batch ]; do sleep 1; done && \
+          cp /poet-shared/poet.batch / && \
+          sawset genesis \
+            -k /etc/sawtooth/keys/validator.priv \
+            -o config-genesis.batch && \
+          sawset proposal create \
+            -k /etc/sawtooth/keys/validator.priv \
+            sawtooth.consensus.algorithm.name=PoET \
+            sawtooth.consensus.algorithm.version=0.1 \
+            sawtooth.poet.report_public_key_pem=\
+            \\\"$$(cat /poet-shared/simulator_rk_pub.pem)\\\" \
+            sawtooth.poet.valid_enclave_measurements=$$(cat /poet-shared/poet-enclave-measurement) \
+            sawtooth.poet.valid_enclave_basenames=$$(cat /poet-shared/poet-enclave-basename) \
+            -o config.batch && \
+          sawset proposal create \
+            -k /etc/sawtooth/keys/validator.priv \
+               sawtooth.poet.target_wait_time=5 \
+               sawtooth.poet.initial_wait_time=25 \
+               sawtooth.publisher.max_batches_per_block=100 \
+            -o poet-settings.batch && \
+          sawadm genesis \
+            config-genesis.batch config.batch poet.batch poet-settings.batch && \
+          sawtooth-validator -v \
+            --bind network:tcp://eth0:8800 \
+            --bind component:tcp://eth0:4004 \
+            --bind consensus:tcp://eth0:5050 \
+            --peering static \
+            --endpoint tcp://validator-0:8800 \
+            --scheduler parallel \
+            --network-auth trust
+      \""
+    environment:
+      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+          /project/sawtooth-core/consensus/poet/simulator:\
+          /project/sawtooth-core/consensus/poet/core"
+    stop_signal: SIGKILL
+
+  validator-1:
+      image: hyperledger/sawtooth-validator:chime
+      container_name: sawtooth-validator-default-1
+      expose:
+        - 4004
+        - 5050
+        - 8800
+      volumes:
+        - poet-shared:/poet-shared
+      command: |
+        bash -c "
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-1 || true && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-1/ && \
+          sawtooth-validator -v \
+              --bind network:tcp://eth0:8800 \
+              --bind component:tcp://eth0:4004 \
+              --bind consensus:tcp://eth0:5050 \
+              --peering static \
+              --endpoint tcp://validator-1:8800 \
+              --peers tcp://validator-0:8800 \
+              --scheduler parallel \
+              --network-auth trust
+        "
+      environment:
+        PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+          /project/sawtooth-core/consensus/poet/simulator:\
+          /project/sawtooth-core/consensus/poet/core"
+      stop_signal: SIGKILL
+
+  validator-2:
+      image: hyperledger/sawtooth-validator:chime
+      container_name: sawtooth-validator-default-2
+      expose:
+        - 4004
+        - 5050
+        - 8800
+      volumes:
+        - poet-shared:/poet-shared
+      command: |
+        bash -c "
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-2 && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-2/ && \
+          sawtooth-validator -v \
+              --bind network:tcp://eth0:8800 \
+              --bind component:tcp://eth0:4004 \
+              --bind consensus:tcp://eth0:5050 \
+              --peering static \
+              --endpoint tcp://validator-2:8800 \
+              --peers tcp://validator-0:8800,tcp://validator-1:8800 \
+              --scheduler parallel \
+              --network-auth trust
+        "
+      environment:
+        PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+          /project/sawtooth-core/consensus/poet/simulator:\
+          /project/sawtooth-core/consensus/poet/core"
+      stop_signal: SIGKILL
+
+  validator-3:
+      image: hyperledger/sawtooth-validator:chime
+      container_name: sawtooth-validator-default-3
+      expose:
+        - 4004
+        - 5050
+        - 8800
+      volumes:
+        - poet-shared:/poet-shared
+      command: |
+        bash -c "
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-3 && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-3/ && \
+          sawtooth-validator -v \
+              --bind network:tcp://eth0:8800 \
+              --bind component:tcp://eth0:4004 \
+              --bind consensus:tcp://eth0:5050 \
+              --peering static \
+              --endpoint tcp://validator-3:8800 \
+              --peers tcp://validator-0:8800,tcp://validator-1:8800,tcp://validator-2:8800 \
+              --scheduler parallel \
+              --network-auth trust
+        "
+      environment:
+        PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+          /project/sawtooth-core/consensus/poet/simulator:\
+          /project/sawtooth-core/consensus/poet/core"
+      stop_signal: SIGKILL
+
+  validator-4:
+      image: hyperledger/sawtooth-validator:chime
+      container_name: sawtooth-validator-default-4
+      expose:
+        - 4004
+        - 5050
+        - 8800
+      volumes:
+        - poet-shared:/poet-shared
+      command: |
+        bash -c "
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-4 && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-4/ && \
+          sawtooth-validator -v \
+              --bind network:tcp://eth0:8800 \
+              --bind component:tcp://eth0:4004 \
+              --bind consensus:tcp://eth0:5050 \
+              --peering static \
+              --endpoint tcp://validator-4:8800 \
+              --peers tcp://validator-0:8800,tcp://validator-1:8800,tcp://validator-2:8800,tcp://validator-3:8800 \
+              --scheduler parallel \
+              --network-auth trust
+        "
+      environment:
+        PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+          /project/sawtooth-core/consensus/poet/simulator:\
+          /project/sawtooth-core/consensus/poet/core"
+      stop_signal: SIGKILL
+  rest-api-0:
+    image: hyperledger/sawtooth-rest-api:chime
+    container_name: sawtooth-rest-api-default-0
+    expose:
+      - 8008
+    command: |
+      bash -c "
+        sawtooth-rest-api \
+          --connect tcp://validator-0:4004 \
+          --bind rest-api-0:8008
+      "
+    stop_signal: SIGKILL
+
+  rest-api-1:
+      image: hyperledger/sawtooth-rest-api:chime
+      container_name: sawtooth-rest-api-default-1
+      expose:
+        - 8008
+      command: |
+        bash -c "
+          sawtooth-rest-api \
+            --connect tcp://validator-1:4004 \
+            --bind rest-api-1:8008
+        "
+      stop_signal: SIGKILL
+
+  rest-api-2:
+      image: hyperledger/sawtooth-rest-api:chime
+      container_name: sawtooth-rest-api-default-2
+      expose:
+        - 8008
+      command: |
+        bash -c "
+          sawtooth-rest-api \
+            --connect tcp://validator-2:4004 \
+            --bind rest-api-2:8008
+        "
+      stop_signal: SIGKILL
+
+  rest-api-3:
+      image: hyperledger/sawtooth-rest-api:chime
+      container_name: sawtooth-rest-api-default-3
+      expose:
+        - 8008
+      command: |
+        bash -c "
+          sawtooth-rest-api \
+            --connect tcp://validator-3:4004 \
+            --bind rest-api-3:8008
+        "
+      stop_signal: SIGKILL
+
+  rest-api-4:
+      image: hyperledger/sawtooth-rest-api:chime
+      container_name: sawtooth-rest-api-default-4
+      expose:
+        - 8008
+      command: |
+        bash -c "
+          sawtooth-rest-api \
+            --connect tcp://validator-4:4004 \
+            --bind rest-api-4:8008
+        "
+      stop_signal: SIGKILL
+  infinity-tp-0:
+    build:
+      context: .
+      dockerfile: ./processor/Dockerfile
+    image: sawtooth-infinity-tp
+    container_name: infinity-tp-0
+    volumes:
+      - .:/project/sawtooth-infinity
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        sleep 1
+        tp-infinity -v -C tcp://validator-0:4004
+      "
+    stop_signal: SIGKILL
+  settings-tp-0:
+    image: hyperledger/sawtooth-settings-tp:chime
+    container_name: sawtooth-settings-tp-default-0
+    expose:
+      - 4004
+    command: settings-tp -v -C tcp://validator-0:4004
+    stop_signal: SIGKILL
+
+  settings-tp-1:
+      image: hyperledger/sawtooth-settings-tp:chime
+      container_name: sawtooth-settings-tp-default-1
+      expose:
+        - 4004
+      command: settings-tp -v -C tcp://validator-1:4004
+      stop_signal: SIGKILL
+
+  settings-tp-2:
+      image: hyperledger/sawtooth-settings-tp:chime
+      container_name: sawtooth-settings-tp-default-2
+      expose:
+        - 4004
+      command: settings-tp -v -C tcp://validator-2:4004
+      stop_signal: SIGKILL
+
+  settings-tp-3:
+      image: hyperledger/sawtooth-settings-tp:chime
+      container_name: sawtooth-settings-tp-default-3
+      expose:
+        - 4004
+      command: settings-tp -v -C tcp://validator-3:4004
+      stop_signal: SIGKILL
+
+  settings-tp-4:
+      image: hyperledger/sawtooth-settings-tp:chime
+      container_name: sawtooth-settings-tp-default-4
+      expose:
+        - 4004
+      command: settings-tp -v -C tcp://validator-4:4004
+      stop_signal: SIGKILL
+
+  infinity-tp-1:
+    build:
+      context: .
+      dockerfile: ./processor/Dockerfile
+    image: sawtooth-infinity-tp
+    container_name: infinity-tp-1
+    volumes:
+      - .:/project/sawtooth-infinity
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        sleep 1
+        tp-infinity -v -C tcp://validator-1:4004
+      "
+    stop_signal: SIGKILL
+
+  infinity-tp-2:
+    build:
+      context: .
+      dockerfile: ./processor/Dockerfile
+    image: sawtooth-infinity-tp
+    container_name: infinity-tp-2
+    volumes:
+      - .:/project/sawtooth-infinity
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        sleep 1
+        tp-infinity -v -C tcp://validator-2:4004
+      "
+    stop_signal: SIGKILL
+
+  infinity-tp-3:
+    build:
+      context: .
+      dockerfile: ./processor/Dockerfile
+    image: sawtooth-infinity-tp
+    container_name: infinity-tp-3
+    volumes:
+      - .:/project/sawtooth-infinity
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        sleep 1
+        tp-infinity -v -C tcp://validator-3:4004
+      "
+    stop_signal: SIGKILL
+
+  infinity-tp-4:
+    build:
+      context: .
+      dockerfile: ./processor/Dockerfile
+    image: sawtooth-infinity-tp
+    container_name: infinity-tp-4
+    volumes:
+      - .:/project/sawtooth-infinity
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        sleep 1
+        tp-infinity -v -C tcp://validator-4:4004
+      "
+    stop_signal: SIGKILL
+
+  infinity-rest-api-0:
+    build:
+      context: .
+      dockerfile: ./rest_api/Dockerfile
+    image: sawtooth-infinity-rest-api
+    container_name: infinity-rest-api-0
+    volumes:
+      - .:/project/sawtooth-infinity
+    ports:
+      - '8000:8000'
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        infinity-rest-api \
+          -B infinity-rest-api-0:8000 \
+          -C validator-0:4004 \
+          --db-host postgres \
+          -vv
+      "
+  infinity-rest-api-1:
+      build:
+        context: .
+        dockerfile: ./rest_api/Dockerfile
+      image: sawtooth-infinity-rest-api
+      container_name: infinity-rest-api-1
+      volumes:
+        - .:/project/sawtooth-infinity
+      ports:
+        - '8000:8000'
+      depends_on:
+        - infinity-shell
+      command: |
+        bash -c "
+          infinity-rest-api \
+            -B infinity-rest-api-1:8000 \
+            -C validator-1:4004 \
+            --db-host postgres \
+            -vv
+        "
+  infinity-rest-api-2:
+    build:
+      context: .
+      dockerfile: ./rest_api/Dockerfile
+    image: sawtooth-infinity-rest-api
+    container_name: infinity-rest-api-2
+    volumes:
+      - .:/project/sawtooth-infinity
+    ports:
+      - '8000:8000'
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        infinity-rest-api \
+          -B infinity-rest-api-2:8000 \
+          -C validator-2:4004 \
+          --db-host postgres \
+          -vv
+      "
+  infinity-rest-api-3:
+    build:
+      context: .
+      dockerfile: ./rest_api/Dockerfile
+    image: sawtooth-infinity-rest-api
+    container_name: infinity-rest-api-3
+    volumes:
+      - .:/project/sawtooth-infinity
+    ports:
+      - '8000:8000'
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        infinity-rest-api \
+          -B infinity-rest-api-3:8000 \
+          -C validator-3:4004 \
+          --db-host postgres \
+          -vv
+      "
+
+  infinity-rest-api-4:
+    build:
+      context: .
+      dockerfile: ./rest_api/Dockerfile
+    image: sawtooth-infinity-rest-api
+    container_name: infinity-rest-api-4
+    volumes:
+      - .:/project/sawtooth-infinity
+    ports:
+      - '8000:8000'
+    depends_on:
+      - infinity-shell
+    command: |
+      bash -c "
+        infinity-rest-api \
+          -B infinity-rest-api-4:8000 \
+          -C validator-4:4004 \
+          --db-host postgres \
+          -vv
+      "
+
+  infinity-subscriber-0:
+    build:
+      context: .
+      dockerfile: ./subscriber/Dockerfile
+    image: sawtooth-infinity-subscriber
+    container_name: infinity-subscriber-0
+    volumes:
+      - '.:/project/sawtooth-infinity'
+    depends_on:
+      - infinity-shell
+      - postgres
+    command: |
+      bash -c "
+        infinity-subscriber init \
+          --db-host postgres \
+          -vv
+        sleep 3
+        infinity-subscriber subscribe \
+          --db-host postgres \
+          -C tcp://validator-0:4004 \
+          -vv
+      "
+  infinity-subscriber-1:
+    build:
+      context: .
+      dockerfile: ./subscriber/Dockerfile
+    image: sawtooth-infinity-subscriber
+    container_name: infinity-subscriber-1
+    volumes:
+      - '.:/project/sawtooth-infinity'
+    depends_on:
+      - infinity-shell
+      - postgres
+    command: |
+      bash -c "
+        infinity-subscriber init \
+          --db-host postgres \
+          -vv
+        sleep 3
+        infinity-subscriber subscribe \
+          --db-host postgres \
+          -C tcp://validator-1:4004 \
+          -vv
+      "
+
+  infinity-subscriber-2:
+    build:
+      context: .
+      dockerfile: ./subscriber/Dockerfile
+    image: sawtooth-infinity-subscriber
+    container_name: infinity-subscriber-2
+    volumes:
+      - '.:/project/sawtooth-infinity'
+    depends_on:
+      - infinity-shell
+      - postgres
+    command: |
+      bash -c "
+        infinity-subscriber init \
+          --db-host postgres \
+          -vv
+        sleep 3
+        infinity-subscriber subscribe \
+          --db-host postgres \
+          -C tcp://validator-2:4004 \
+          -vv
+      "
+
+  infinity-subscriber-3:
+    build:
+      context: .
+      dockerfile: ./subscriber/Dockerfile
+    image: sawtooth-infinity-subscriber
+    container_name: infinity-subscriber
+    volumes:
+      - '.:/project/sawtooth-infinity'
+    depends_on:
+      - infinity-shell
+      - postgres
+    command: |
+      bash -c "
+        infinity-subscriber init \
+          --db-host postgres \
+          -vv
+        sleep 3
+        infinity-subscriber subscribe \
+          --db-host postgres \
+          -C tcp://validator-3:4004 \
+          -vv
+      "
+
+  infinity-subscriber-4:
+    build:
+      context: .
+      dockerfile: ./subscriber/Dockerfile
+    image: sawtooth-infinity-subscriber
+    container_name: infinity-subscriber-4
+    volumes:
+      - '.:/project/sawtooth-infinity'
+    depends_on:
+      - infinity-shell
+      - postgres
+    command: |
+      bash -c "
+        infinity-subscriber init \
+          --db-host postgres \
+          -vv
+        sleep 3
+        infinity-subscriber subscribe \
+          --db-host postgres \
+          -C tcp://validator-4:4004 \
+          -vv
+      "
+
+  postgres-0:
+    image: postgres:alpine
+    container_name: infinity-postgres-0
+    restart: always
+    environment:
+      POSTGRES_USER: sawtooth
+      POSTGRES_PASSWORD: sawtooth
+      POSTGRES_DB: infinity
+    ports:
+      - '5432:5432'
+
+  postgres-1:
+    image: postgres:alpine
+    container_name: infinity-postgres-1
+    restart: always
+    environment:
+      POSTGRES_USER: sawtooth
+      POSTGRES_PASSWORD: sawtooth
+      POSTGRES_DB: infinity
+    ports:
+      - '5432:5432'
+
+  postgres-2:
+    image: postgres:alpine
+    container_name: infinity-postgres-2
+    restart: always
+    environment:
+      POSTGRES_USER: sawtooth
+      POSTGRES_PASSWORD: sawtooth
+      POSTGRES_DB: infinity
+    ports:
+      - '5432:5432'
+
+  postgres-3:
+    image: postgres:alpine
+    container_name: infinity-postgres-3
+    restart: always
+    environment:
+      POSTGRES_USER: sawtooth
+      POSTGRES_PASSWORD: sawtooth
+      POSTGRES_DB: infinity
+    ports:
+      - '5432:5432'
+
+  postgres-4:
+    image: postgres:alpine
+    container_name: infinity-postgres-4
+    restart: always
+    environment:
+      POSTGRES_USER: sawtooth
+      POSTGRES_PASSWORD: sawtooth
+      POSTGRES_DB: infinity
+    ports:
+      - '5432:5432'
+  adminer-0:
+      image: adminer
+      container_name: infinity-adminer-0
+      restart: always
+      ports:
+        - '8080:8080'
+
+  adminer-1:
+    image: adminer
+    container_name: infinity-adminer-1
+    restart: always
+    ports:
+      - '8080:8080'
+
+
+  adminer-2:
+    image: adminer
+    container_name: infinity-adminer-2
+    restart: always
+    ports:
+      - '8080:8080'
+
+
+  adminer-3:
+    image: adminer
+    container_name: infinity-adminer-3
+    restart: always
+    ports:
+      - '8080:8080'
+
+  adminer-4:
+    image: adminer
+    container_name: infinity-adminer-4
+    restart: always
+    ports:
+      - '8080:8080'
+
+  poet-engine-0:
+    image: hyperledger/sawtooth-poet-engine:chime
+    container_name: sawtooth-poet-engine-0
+    volumes:
+      - poet-shared:/poet-shared
+    command: "bash -c \"\
+          if [ ! -f /poet-shared/poet-enclave-measurement ]; then \
+              poet enclave measurement >> /poet-shared/poet-enclave-measurement; \
+          fi && \
+          if [ ! -f /poet-shared/poet-enclave-basename ]; then \
+              poet enclave basename >> /poet-shared/poet-enclave-basename; \
+          fi && \
+          if [ ! -f /poet-shared/simulator_rk_pub.pem ]; then \
+              cp /etc/sawtooth/simulator_rk_pub.pem /poet-shared; \
+          fi && \
+          while [ ! -f /poet-shared/validator-0/keys/validator.priv ]; do sleep 1; done && \
+          cp -a /poet-shared/validator-0/keys /etc/sawtooth && \
+          poet registration create -k /etc/sawtooth/keys/validator.priv -o /poet-shared/poet.batch && \
+          poet-engine -C tcp://validator-0:5050 --component tcp://validator-0:4004 \
+      \""
+
+  poet-engine-1:
+      image: hyperledger/sawtooth-poet-engine:chime
+      container_name: sawtooth-poet-engine-1
+      volumes:
+        - poet-shared:/poet-shared
+      command: "bash -c \"\
+          while [ ! -f /poet-shared/validator-1/keys/validator.priv ]; do sleep 1; done && \
+          cp -a /poet-shared/validator-1/keys /etc/sawtooth && \
+          poet-engine -C tcp://validator-1:5050 --component tcp://validator-1:4004 \
+      \""
+
+  poet-engine-2:
+      image: hyperledger/sawtooth-poet-engine:chime
+      container_name: sawtooth-poet-engine-2
+      volumes:
+        - poet-shared:/poet-shared
+      command: "bash -c \"\
+          while [ ! -f /poet-shared/validator-2/keys/validator.priv ]; do sleep 1; done && \
+          cp -a /poet-shared/validator-2/keys /etc/sawtooth && \
+          poet-engine -C tcp://validator-2:5050 --component tcp://validator-2:4004 \
+      \""
+
+  poet-engine-3:
+      image: hyperledger/sawtooth-poet-engine:chime
+      container_name: sawtooth-poet-engine-3
+      volumes:
+        - poet-shared:/poet-shared
+      command: "bash -c \"\
+          while [ ! -f /poet-shared/validator-3/keys/validator.priv ]; do sleep 1; done && \
+          cp -a /poet-shared/validator-3/keys /etc/sawtooth && \
+          poet-engine -C tcp://validator-3:5050 --component tcp://validator-3:4004 \
+      \""
+
+  poet-engine-4:
+      image: hyperledger/sawtooth-poet-engine:chime
+      container_name: sawtooth-poet-engine-4
+      volumes:
+        - poet-shared:/poet-shared
+      command: "bash -c \"\
+          while [ ! -f /poet-shared/validator-4/keys/validator.priv ]; do sleep 1; done && \
+          cp -a /poet-shared/validator-4/keys /etc/sawtooth && \
+          poet-engine -C tcp://validator-4:5050 --component tcp://validator-4:4004 \
+      \""
+
+  poet-validator-registry-tp-0:
+      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
+      container_name: sawtooth-poet-validator-registry-tp-0
+      expose:
+        - 4004
+      command: poet-validator-registry-tp -C tcp://validator-0:4004
+      environment:
+        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+      stop_signal: SIGKILL
+
+  poet-validator-registry-tp-1:
+      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
+      container_name: sawtooth-poet-validator-registry-tp-1
+      expose:
+        - 4004
+      command: poet-validator-registry-tp -C tcp://validator-1:4004
+      environment:
+        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+      stop_signal: SIGKILL
+
+  poet-validator-registry-tp-2:
+      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
+      container_name: sawtooth-poet-validator-registry-tp-2
+      expose:
+        - 4004
+      command: poet-validator-registry-tp -C tcp://validator-2:4004
+      environment:
+        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+      stop_signal: SIGKILL
+
+  poet-validator-registry-tp-3:
+      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
+      container_name: sawtooth-poet-validator-registry-tp-3
+      expose:
+        - 4004
+      command: poet-validator-registry-tp -C tcp://validator-3:4004
+      environment:
+        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+      stop_signal: SIGKILL
+
+  poet-validator-registry-tp-4:
+      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
+      container_name: sawtooth-poet-validator-registry-tp-4
+      expose:
+        - 4004
+      command: poet-validator-registry-tp -C tcp://validator-4:4004
+      environment:
+        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+      stop_signal: SIGKILL
