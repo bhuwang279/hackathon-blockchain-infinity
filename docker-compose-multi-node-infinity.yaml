@@ -353,7 +353,6 @@ services:
             -B infinity-rest-api-1:8001 \
             -C validator-1:4004 \
             --db-host postgres-1 \
-            --db-port 5433 \
             -vv
         "
   infinity-rest-api-2:
@@ -374,7 +373,6 @@ services:
           -B infinity-rest-api-2:8002 \
           -C validator-2:4004 \
           --db-host postgres-2 \
-          --db-port 5434 \
           -vv
       "
   infinity-rest-api-3:
@@ -395,7 +393,6 @@ services:
           -B infinity-rest-api-3:8003 \
           -C validator-3:4004 \
           --db-host postgres-3 \
-          --db-port 5435 \
           -vv
       "
 
@@ -441,7 +438,6 @@ services:
         sleep 3
         infinity-subscriber subscribe \
           --db-host postgres-1 \
-          --db-port 5433 \
           -C tcp://validator-1:4004 \
           -vv
       "
@@ -461,7 +457,6 @@ services:
       bash -c "
         infinity-subscriber init \
           --db-host postgres-2 \
-          --db-port 5434 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
@@ -485,7 +480,6 @@ services:
       bash -c "
         infinity-subscriber init \
           --db-host postgres-3 \
-          --db-port 5435 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
@@ -503,8 +497,8 @@ services:
       POSTGRES_USER: sawtooth
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
-    ports:
-      - '5432:5432'
+    expose:
+      - 5432
 
   postgres-1:
     image: postgres:alpine
@@ -514,8 +508,8 @@ services:
       POSTGRES_USER: sawtooth
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
-    ports:
-      - '5433:5432'
+    expose:
+      - 5432
 
   postgres-2:
     image: postgres:alpine
@@ -525,8 +519,8 @@ services:
       POSTGRES_USER: sawtooth
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
-    ports:
-      - '5434:5432'
+    expose:
+      - 5432
 
   postgres-3:
     image: postgres:alpine
@@ -536,8 +530,8 @@ services:
       POSTGRES_USER: sawtooth
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
-    ports:
-      - '5435:5432'
+    expose:
+      - 5432
 
   adminer-0:
       image: adminer
