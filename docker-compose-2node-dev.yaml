@@ -332,35 +332,27 @@ services:
           poet-engine -C tcp://validator-0:5050 --component tcp://validator-0:4004 \
       \""
 
-  poet-engine-1:
-      image: hyperledger/sawtooth-poet-engine:chime
-      container_name: sawtooth-poet-engine-1
-      volumes:
-        - poet-shared:/poet-shared
-      command: "bash -c \"\
-          while [ ! -f /poet-shared/validator-1/keys/validator.priv ]; do sleep 1; done && \
-          cp -a /poet-shared/validator-1/keys /etc/sawtooth && \
-          poet-engine -C tcp://validator-1:5050 --component tcp://validator-1:4004 \
-      \""
+  devmode-engine-0:
+    image: hyperledger/sawtooth-devmode-engine-rust:1.2
+    expose:
+      - 5050
+    ports:
+      - '5050:5050'
+    container_name: sawtooth-devmode-engine-rust-default-0
+    depends_on:
+      - validator-0
+    entrypoint: devmode-engine-rust --connect tcp://validator-0:5050
 
 
-  poet-validator-registry-tp-0:
-      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
-      container_name: sawtooth-poet-validator-registry-tp-0
-      expose:
-        - 4004
-      command: poet-validator-registry-tp -C tcp://validator-0:4004
-      environment:
-        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
-      stop_signal: SIGKILL
+  devmode-engine-2:
+    image: hyperledger/sawtooth-devmode-engine-rust:1.2
+    expose:
+      - 5050
+    ports:
+      - '5051:5050'
+    container_name: sawtooth-devmode-engine-rust-default-2
+    depends_on:
+      - validator-0
+    entrypoint: devmode-engine-rust --connect tcp://validator-2:5050
 
-  poet-validator-registry-tp-1:
-      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
-      container_name: sawtooth-poet-validator-registry-tp-1
-      expose:
-        - 4004
-      command: poet-validator-registry-tp -C tcp://validator-1:4004
-      environment:
-        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
-      stop_signal: SIGKILL
 
