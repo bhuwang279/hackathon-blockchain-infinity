@@ -394,7 +394,7 @@ services:
         infinity-rest-api \
           -B infinity-rest-api-0:8000 \
           -C validator-0:4004 \
-          --db-host postgres \
+          --db-host postgres-0 \
           -vv
       "
   infinity-rest-api-1:
@@ -414,7 +414,7 @@ services:
           infinity-rest-api \
             -B infinity-rest-api-1:8000 \
             -C validator-1:4004 \
-            --db-host postgres \
+            --db-host postgres-1 \
             -vv
         "
   infinity-rest-api-2:
@@ -434,7 +434,7 @@ services:
         infinity-rest-api \
           -B infinity-rest-api-2:8000 \
           -C validator-2:4004 \
-          --db-host postgres \
+          --db-host postgres-2 \
           -vv
       "
   infinity-rest-api-3:
@@ -454,7 +454,7 @@ services:
         infinity-rest-api \
           -B infinity-rest-api-3:8000 \
           -C validator-3:4004 \
-          --db-host postgres \
+          --db-host postgres-3 \
           -vv
       "
 
@@ -475,7 +475,7 @@ services:
         infinity-rest-api \
           -B infinity-rest-api-4:8000 \
           -C validator-4:4004 \
-          --db-host postgres \
+          --db-host postgres-3 \
           -vv
       "
 
@@ -515,7 +515,7 @@ services:
     command: |
       bash -c "
         infinity-subscriber init \
-          --db-host postgres \
+          --db-host postgres-1 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
