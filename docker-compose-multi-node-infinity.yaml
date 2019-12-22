@@ -344,7 +344,7 @@ services:
       volumes:
         - .:/project/sawtooth-infinity
       ports:
-        - '8001:8000'
+        - '8000:8001'
       depends_on:
         - infinity-shell
       command: |
@@ -365,7 +365,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8002:8000'
+      - '8000:8002'
     depends_on:
       - infinity-shell
     command: |
@@ -386,7 +386,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8003:8000'
+      - '8000:8003'
     depends_on:
       - infinity-shell
     command: |
@@ -515,7 +515,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5433:5432'
+      - '5432:5433'
 
   postgres-2:
     image: postgres:alpine
@@ -526,7 +526,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5434:5432'
+      - '5432:5434'
 
   postgres-3:
     image: postgres:alpine
@@ -537,7 +537,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5435:5432'
+      - '5432:5435'
 
   adminer-0:
       image: adminer
@@ -551,7 +551,7 @@ services:
     container_name: infinity-adminer-1
     restart: always
     ports:
-      - '8081:8080'
+      - '8080:8081'
 
 
   adminer-2:
@@ -559,7 +559,7 @@ services:
     container_name: infinity-adminer-2
     restart: always
     ports:
-      - '8082:8080'
+      - '8080:8082'
 
 
   adminer-3:
@@ -567,7 +567,7 @@ services:
     container_name: infinity-adminer-3
     restart: always
     ports:
-      - '8083:8080'
+      - '8080:8083'
 
 
   poet-engine-0:
