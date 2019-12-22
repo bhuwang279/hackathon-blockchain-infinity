@@ -493,11 +493,11 @@ services:
     command: |
       bash -c "
         infinity-subscriber init \
-          --db-host postgres \
+          --db-host postgres-0 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
-          --db-host postgres \
+          --db-host postgres-0 \
           -C tcp://validator-0:4004 \
           -vv
       "
@@ -519,7 +519,7 @@ services:
           -vv
         sleep 3
         infinity-subscriber subscribe \
-          --db-host postgres \
+          --db-host postgres-1 \
           -C tcp://validator-1:4004 \
           -vv
       "
@@ -538,11 +538,11 @@ services:
     command: |
       bash -c "
         infinity-subscriber init \
-          --db-host postgres \
+          --db-host postgres-2 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
-          --db-host postgres \
+          --db-host postgres-2 \
           -C tcp://validator-2:4004 \
           -vv
       "
@@ -561,11 +561,11 @@ services:
     command: |
       bash -c "
         infinity-subscriber init \
-          --db-host postgres \
+          --db-host postgres-3 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
-          --db-host postgres \
+          --db-host postgres-3 \
           -C tcp://validator-3:4004 \
           -vv
       "
@@ -584,11 +584,11 @@ services:
     command: |
       bash -c "
         infinity-subscriber init \
-          --db-host postgres \
+          --db-host postgres-4 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
-          --db-host postgres \
+          --db-host postgres-4 \
           -C tcp://validator-4:4004 \
           -vv
       "
