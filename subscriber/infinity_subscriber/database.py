@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS records (
     name             varchar,
     price            varchar,
     isForSale        bool,
+    is_stolen        bool,
     start_block_num  bigint,
     end_block_num    bigint
 );
@@ -273,14 +274,16 @@ class Database(object):
         name,
         price,
         isForSale,
+        is_stolen,
         start_block_num,
         end_block_num)
-        VALUES ('{}', '{}', '{}','{}', '{}', '{}');
+        VALUES ('{}', '{}', '{}','{}', '{}', '{}', '{}');
         """.format(
             record_dict['record_id'],
             record_dict['name'],
             record_dict['price'],
             record_dict['isForSale'],
+            record_dict['is_stolen'],
             record_dict['start_block_num'],
             record_dict['end_block_num'])
 

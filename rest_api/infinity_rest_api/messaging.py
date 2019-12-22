@@ -9,7 +9,7 @@ from sawtooth_signing import secp256k1
 from infinity_rest_api.errors import ApiBadRequest
 from infinity_rest_api.errors import ApiInternalError
 from infinity_rest_api.transaction_creation import \
-    make_create_user_transaction
+    make_create_user_transaction, make_update_record_stolen
 from infinity_rest_api.transaction_creation import \
     make_create_record_transaction
 from infinity_rest_api.transaction_creation import \
@@ -126,6 +126,21 @@ class Messenger(object):
             batch_signer=self._batch_signer,
             record_id=record_id,
             isForSale=isForSale,
+            timestamp=timestamp)
+        await self._send_and_wait_for_commit(batch)
+
+    async def send_update_record_stolen(self,
+                                        private_key,
+                                        is_stolen,
+                                        record_id,
+                                        timestamp):
+        transaction_signer = self._crypto_factory.new_signer(
+            secp256k1.Secp256k1PrivateKey.from_hex(private_key))
+        batch = make_update_record_stolen(
+            transaction_signer=transaction_signer,
+            batch_signer=self._batch_signer,
+            record_id=record_id,
+            is_stolen=is_stolen,
             timestamp=timestamp)
         await self._send_and_wait_for_commit(batch)
 

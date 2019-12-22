@@ -89,6 +89,7 @@ def start_rest_api(host, port, messenger, database):
         '/records/{record_id}/transfer', handler.transfer_record)
     app.router.add_post('/records/{record_id}/update_location', handler.update_record_location)
     app.router.add_post('/records/{record_id}/update_for_sale', handler.update_record_for_sale)
+    app.router.add_post('/records/{record_id}/update_stolen', handler.update_record_stolen)
 
     LOGGER.info('Starting Infinity REST API on %s:%s', host, port)
     web.run_app(

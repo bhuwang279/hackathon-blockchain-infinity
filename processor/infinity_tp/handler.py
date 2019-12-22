@@ -66,6 +66,11 @@ class InfinityHandler(TransactionHandler):
                 state=state,
                 public_key=header.signer_public_key,
                 payload=payload)
+        elif payload.action == payload_pb2.InfinityPayload.UPDATE_RECORD_STOLEN:
+            _update_record_stolen(
+                state=state,
+                public_key=header.signer_public_key,
+                payload=payload)
         else:
             raise InvalidTransaction('Unhandled action')
 
@@ -146,6 +151,7 @@ def _update_record_location(state, public_key, payload):
         longitude=payload.data.longitude,
         record_id=payload.data.record_id,
         timestamp=payload.timestamp)
+
 def _update_record_is_for_sale(state, public_key, payload):
     record = state.get_record(payload.data.record_id)
     if record is None:
@@ -158,6 +164,22 @@ def _update_record_is_for_sale(state, public_key, payload):
     state.update_record_is_for_sale(
         record_id=payload.data.record_id,
         isForSale=payload.data.isForSale,
+        timestamp=payload.timestamp,
+    )
+
+
+def _update_record_stolen(state, public_key, payload):
+    record = state.get_record(payload.data.record_id)
+    if record is None:
+        raise InvalidTransaction('Record with the record id {} does not exist'.format(payload.data.record_id))
+
+    if not _validate_record_owner(signer_public_key=public_key, record=record):
+        raise InvalidTransaction(
+            'Transaction signer is not the owner of the record'
+        )
+    state.update_record_is_stolen(
+        record_id=payload.data.record_id,
+        is_stolen=payload.data.is_stolen,
         timestamp=payload.timestamp,
     )
 

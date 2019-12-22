@@ -242,6 +242,49 @@ def make_update_record_is_for_sale_transaction(transaction_signer,
         batch_signer=batch_signer)
 
 
+def make_update_record_stolen(transaction_signer,
+                              batch_signer,
+                              record_id,
+                              is_stolen,
+                              timestamp):
+    """Make a CreateRecordAction transaction and wrap it in a batch
+
+    Args:
+        transaction_signer (sawtooth_signing.Signer): The transaction key pair
+        batch_signer (sawtooth_signing.Signer): The batch key pair
+        isForSale (bool): bool flag if record is for sale
+        record_id (str): Unique ID of the record
+        timestamp (int): Unix UTC timestamp of when the record is updated
+
+    Returns:
+        batch_pb2.Batch: The transaction wrapped in a batch
+    """
+    user_address = addresser.get_user_address(
+        transaction_signer.get_public_key().as_hex())
+    record_address = addresser.get_record_address(record_id)
+
+    inputs = [user_address, record_address]
+
+    outputs = [record_address]
+
+    action = payload_pb2.UpdateRecordStolenAction(
+        record_id=record_id,
+        is_stolen=is_stolen)
+
+    payload = payload_pb2.InfinityPayload(
+        action=payload_pb2.InfinityPayload.UPDATE_RECORD_STOLEN,
+        update_record_stolen=action,
+        timestamp=timestamp)
+    payload_bytes = payload.SerializeToString()
+
+    return _make_batch(
+        payload_bytes=payload_bytes,
+        inputs=inputs,
+        outputs=outputs,
+        transaction_signer=transaction_signer,
+        batch_signer=batch_signer)
+
+
 def _make_batch(payload_bytes,
                 inputs,
                 outputs,

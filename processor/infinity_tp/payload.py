@@ -38,6 +38,12 @@ class InfinityPayload(object):
                 payload_pb2.InfinityPayload.UPDATE_RECORD_FOR_SALE:
             return self._transaction.update_record_for_sale
 
+        if self._transaction.HasField('update_record_stolen') and \
+            self._transaction.action == \
+                payload_pb2.InfinityPayload.UPDATE_RECORD_STOLEN:
+            return self._transaction.update_record_stolen
+
+
         raise InvalidTransaction('Action does not match payload data')
 
     @property

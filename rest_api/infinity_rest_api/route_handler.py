@@ -169,6 +169,24 @@ class RouteHandler(object):
         return json_response(
             {'data': 'Update record transaction submitted'})
 
+    async def update_record_stolen(self, request):
+        private_key = await self._authorize(request)
+
+        body = await decode_request(request)
+        required_fields = ['is_stolen']
+        validate_fields(required_fields, body)
+
+        record_id = request.match_info.get('record_id', '')
+
+        await self._messenger.send_update_record_stolen(
+            private_key=private_key,
+            is_stolen=body['is_stolen'],
+            record_id=record_id,
+            timestamp=get_time())
+
+        return json_response(
+            {'data': 'Update record transaction submitted'})
+
 
     async def _authorize(self, request):
         token = request.headers.get('AUTHORIZATION')

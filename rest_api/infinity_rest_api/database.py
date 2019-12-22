@@ -114,7 +114,7 @@ class Database(object):
 
     async def fetch_record_resource(self, record_id):
         fetch_record = """
-        SELECT record_id, name, price, isForSale FROM records
+        SELECT record_id, name, price, isForSale, is_stolen FROM records
         WHERE record_id='{0}'
         AND ({1}) >= start_block_num
         AND ({1}) < end_block_num;
@@ -151,7 +151,7 @@ class Database(object):
 
     async def fetch_all_record_resources(self):
         fetch_records = """
-        SELECT record_id FROM records
+        SELECT record_id, price, isForSale , is_stolen From records
         WHERE ({0}) >= start_block_num
         AND ({0}) < end_block_num;
         """.format(LATEST_BLOCK_NUM)

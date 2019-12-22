@@ -205,3 +205,19 @@ class InfinityState(object):
             updated_state = {}
             updated_state[address] = data
             self._context.set_state(updated_state, timeout=self._timeout)
+
+    def update_record_is_stolen(self, record_id, is_stolen, timestamp):
+        address = addresser.get_record_address(record_id)
+        container = record_pb2.RecordContainer()
+        state_entries = self._context.get_state(
+            addresses=[address], timeout=self._timeout)
+        if state_entries:
+            container.ParseFromString(state_entries[0].data)
+            for record in container.entries:
+                if record.record_id == record_id:
+                    record.is_stolen = is_stolen
+                    record.updated_timestamp = timestamp
+            data = container.SerializeToString()
+            updated_state = {}
+            updated_state[address] = data
+            self._context.set_state(updated_state, timeout=self._timeout)

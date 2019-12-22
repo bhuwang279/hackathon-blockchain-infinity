@@ -41,6 +41,7 @@ message Record {
 
     uint64 created_timestamp = 9;
     uint64 updated_timestamp = 10;
+    bool is_stolen = 11;
 
 }
 
