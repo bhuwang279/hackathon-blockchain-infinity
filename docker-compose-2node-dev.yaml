@@ -310,28 +310,6 @@ services:
     ports:
       - '8081:8080'
 
-
-  poet-engine-0:
-    image: hyperledger/sawtooth-poet-engine:chime
-    container_name: sawtooth-poet-engine-0
-    volumes:
-      - poet-shared:/poet-shared
-    command: "bash -c \"\
-          if [ ! -f /poet-shared/poet-enclave-measurement ]; then \
-              poet enclave measurement >> /poet-shared/poet-enclave-measurement; \
-          fi && \
-          if [ ! -f /poet-shared/poet-enclave-basename ]; then \
-              poet enclave basename >> /poet-shared/poet-enclave-basename; \
-          fi && \
-          if [ ! -f /poet-shared/simulator_rk_pub.pem ]; then \
-              cp /etc/sawtooth/simulator_rk_pub.pem /poet-shared; \
-          fi && \
-          while [ ! -f /poet-shared/validator-0/keys/validator.priv ]; do sleep 1; done && \
-          cp -a /poet-shared/validator-0/keys /etc/sawtooth && \
-          poet registration create -k /etc/sawtooth/keys/validator.priv -o /poet-shared/poet.batch && \
-          poet-engine -C tcp://validator-0:5050 --component tcp://validator-0:4004 \
-      \""
-
   devmode-engine-0:
     image: hyperledger/sawtooth-devmode-engine-rust:1.2
     expose:
