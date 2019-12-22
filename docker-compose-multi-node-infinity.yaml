@@ -412,7 +412,7 @@ services:
       command: |
         bash -c "
           infinity-rest-api \
-            -B infinity-rest-api-1:8000 \
+            -B infinity-rest-api-1:8001 \
             -C validator-1:4004 \
             --db-host postgres-1 \
             -vv
@@ -432,7 +432,7 @@ services:
     command: |
       bash -c "
         infinity-rest-api \
-          -B infinity-rest-api-2:8000 \
+          -B infinity-rest-api-2:8001 \
           -C validator-2:4004 \
           --db-host postgres-2 \
           -vv
@@ -452,7 +452,7 @@ services:
     command: |
       bash -c "
         infinity-rest-api \
-          -B infinity-rest-api-3:8000 \
+          -B infinity-rest-api-3:8001 \
           -C validator-3:4004 \
           --db-host postgres-3 \
           -vv
@@ -473,7 +473,7 @@ services:
     command: |
       bash -c "
         infinity-rest-api \
-          -B infinity-rest-api-4:8000 \
+          -B infinity-rest-api-4:8001 \
           -C validator-4:4004 \
           --db-host postgres-3 \
           -vv
