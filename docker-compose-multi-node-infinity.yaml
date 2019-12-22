@@ -406,7 +406,7 @@ services:
       volumes:
         - .:/project/sawtooth-infinity
       ports:
-        - '8000:8001'
+        - '8001:8001'
       depends_on:
         - infinity-shell
       command: |
@@ -426,7 +426,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8000:8002'
+      - '8002:8002'
     depends_on:
       - infinity-shell
     command: |
@@ -446,7 +446,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8000:8003'
+      - '8003:8003'
     depends_on:
       - infinity-shell
     command: |
@@ -467,7 +467,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8000:8004'
+      - '8004:8004'
     depends_on:
       - infinity-shell
     command: |
@@ -552,7 +552,7 @@ services:
       context: .
       dockerfile: ./subscriber/Dockerfile
     image: sawtooth-infinity-subscriber
-    container_name: infinity-subscriber
+    container_name: infinity-subscriber-3
     volumes:
       - '.:/project/sawtooth-infinity'
     depends_on:
@@ -613,7 +613,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5432:5433'
+      - '5433:5433'
 
   postgres-2:
     image: postgres:alpine
@@ -624,7 +624,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5432:5434'
+      - '5434:5434'
 
   postgres-3:
     image: postgres:alpine
@@ -635,7 +635,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5432:5435'
+      - '5435:5435'
 
   postgres-4:
     image: postgres:alpine
@@ -646,7 +646,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5432:5436'
+      - '5436:5436'
   adminer-0:
       image: adminer
       container_name: infinity-adminer-0
@@ -667,7 +667,7 @@ services:
     container_name: infinity-adminer-2
     restart: always
     ports:
-      - '8080:8081'
+      - '8081:8081'
 
 
   adminer-3:
@@ -675,14 +675,14 @@ services:
     container_name: infinity-adminer-3
     restart: always
     ports:
-      - '8080:8082'
+      - '8082:8082'
 
   adminer-4:
     image: adminer
     container_name: infinity-adminer-4
     restart: always
     ports:
-      - '8080:8083'
+      - '8083:8083'
 
   poet-engine-0:
     image: hyperledger/sawtooth-poet-engine:chime
