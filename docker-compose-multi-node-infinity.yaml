@@ -659,7 +659,7 @@ services:
     container_name: infinity-adminer-1
     restart: always
     ports:
-      - '8080:8080'
+      - '8081:8081'
 
 
   adminer-2:
@@ -667,7 +667,7 @@ services:
     container_name: infinity-adminer-2
     restart: always
     ports:
-      - '8081:8081'
+      - '8082:8082'
 
 
   adminer-3:
@@ -675,14 +675,14 @@ services:
     container_name: infinity-adminer-3
     restart: always
     ports:
-      - '8082:8082'
+      - '8083:8083'
 
   adminer-4:
     image: adminer
     container_name: infinity-adminer-4
     restart: always
     ports:
-      - '8083:8083'
+      - '8084:8084'
 
   poet-engine-0:
     image: hyperledger/sawtooth-poet-engine:chime
