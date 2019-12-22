@@ -344,7 +344,7 @@ services:
       volumes:
         - .:/project/sawtooth-infinity
       ports:
-        - '8001:8001'
+        - '8000:8001'
       depends_on:
         - infinity-shell
       command: |
@@ -353,6 +353,7 @@ services:
             -B infinity-rest-api-1:8001 \
             -C validator-1:4004 \
             --db-host postgres-1 \
+            --db-port 5433 \
             -vv
         "
   infinity-rest-api-2:
@@ -364,7 +365,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8002:8002'
+      - '8000:8002'
     depends_on:
       - infinity-shell
     command: |
@@ -373,6 +374,7 @@ services:
           -B infinity-rest-api-2:8002 \
           -C validator-2:4004 \
           --db-host postgres-2 \
+          --db-port 5434 \
           -vv
       "
   infinity-rest-api-3:
@@ -384,7 +386,7 @@ services:
     volumes:
       - .:/project/sawtooth-infinity
     ports:
-      - '8003:8003'
+      - '8000:8003'
     depends_on:
       - infinity-shell
     command: |
@@ -393,6 +395,7 @@ services:
           -B infinity-rest-api-3:8003 \
           -C validator-3:4004 \
           --db-host postgres-3 \
+          --db-port 5435 \
           -vv
       "
 
@@ -438,6 +441,7 @@ services:
         sleep 3
         infinity-subscriber subscribe \
           --db-host postgres-1 \
+          --db-port 5433 \
           -C tcp://validator-1:4004 \
           -vv
       "
@@ -457,6 +461,7 @@ services:
       bash -c "
         infinity-subscriber init \
           --db-host postgres-2 \
+          --db-port 5434 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
@@ -480,6 +485,7 @@ services:
       bash -c "
         infinity-subscriber init \
           --db-host postgres-3 \
+          --db-port 5435 \
           -vv
         sleep 3
         infinity-subscriber subscribe \
@@ -509,7 +515,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5433:5433'
+      - '5432:5433'
 
   postgres-2:
     image: postgres:alpine
@@ -520,7 +526,7 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5434:5434'
+      - '5432:5434'
 
   postgres-3:
     image: postgres:alpine
@@ -531,18 +537,8 @@ services:
       POSTGRES_PASSWORD: sawtooth
       POSTGRES_DB: infinity
     ports:
-      - '5435:5435'
+      - '5432:5435'
 
-  postgres-4:
-    image: postgres:alpine
-    container_name: infinity-postgres-4
-    restart: always
-    environment:
-      POSTGRES_USER: sawtooth
-      POSTGRES_PASSWORD: sawtooth
-      POSTGRES_DB: infinity
-    ports:
-      - '5436:5436'
   adminer-0:
       image: adminer
       container_name: infinity-adminer-0
@@ -555,7 +551,7 @@ services:
     container_name: infinity-adminer-1
     restart: always
     ports:
-      - '8081:8081'
+      - '8080:8081'
 
 
   adminer-2:
@@ -563,7 +559,7 @@ services:
     container_name: infinity-adminer-2
     restart: always
     ports:
-      - '8082:8082'
+      - '8080:8082'
 
 
   adminer-3:
@@ -571,14 +567,8 @@ services:
     container_name: infinity-adminer-3
     restart: always
     ports:
-      - '8083:8083'
+      - '8080:8083'
 
-  adminer-4:
-    image: adminer
-    container_name: infinity-adminer-4
-    restart: always
-    ports:
-      - '8084:8084'
 
   poet-engine-0:
     image: hyperledger/sawtooth-poet-engine:chime
@@ -634,16 +624,6 @@ services:
           poet-engine -C tcp://validator-3:5050 --component tcp://validator-3:4004 \
       \""
 
-  poet-engine-4:
-      image: hyperledger/sawtooth-poet-engine:chime
-      container_name: sawtooth-poet-engine-4
-      volumes:
-        - poet-shared:/poet-shared
-      command: "bash -c \"\
-          while [ ! -f /poet-shared/validator-4/keys/validator.priv ]; do sleep 1; done && \
-          cp -a /poet-shared/validator-4/keys /etc/sawtooth && \
-          poet-engine -C tcp://validator-4:5050 --component tcp://validator-4:4004 \
-      \""
 
   poet-validator-registry-tp-0:
       image: hyperledger/sawtooth-poet-validator-registry-tp:chime
@@ -685,12 +665,3 @@ services:
         PYTHONPATH: /project/sawtooth-core/consensus/poet/common
       stop_signal: SIGKILL
 
-  poet-validator-registry-tp-4:
-      image: hyperledger/sawtooth-poet-validator-registry-tp:chime
-      container_name: sawtooth-poet-validator-registry-tp-4
-      expose:
-        - 4004
-      command: poet-validator-registry-tp -C tcp://validator-4:4004
-      environment:
-        PYTHONPATH: /project/sawtooth-core/consensus/poet/common
-      stop_signal: SIGKILL
